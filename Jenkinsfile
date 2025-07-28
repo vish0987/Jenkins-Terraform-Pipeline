@@ -1,34 +1,49 @@
- pipeline {
-   agent any
-   tools {
-        terraform "terraform_1.12.2"
+ipeline {
+    agent any
+
+    environment {
+        TF_IN_AUTOMATION = "true"
     }
-   stages {
-        stage('SCM') {
+
+    stages {
+        stage('Clone Repository') {
             steps {
-              git url : ' https://github.com/vish0987/Jenkins-Terraform-Pipeline.git ’
-              }
-           }
-        stage('terraform init') {
-            steps {
-               sh 'terraform init'
-              }
+                git url: 'https://github.com/vish0987/Jenkins-Terraform-Pipeline.git'
             }
-        stage('terraform validate') {
+        }
+
+        stage('Terraform Init') {
             steps {
-               sh 'terraform validate'
-              }
+                sh 'terraform init'
             }
-        stage('terraform plan') {
+        }
+
+        stage('Terraform Validate') {
             steps {
-               sh 'terraform plan'
-              }
+                sh 'terraform validate'
             }
-        stage('terraform apply') {
+        }
+
+        stage('Terraform Plan') {
             steps {
-               sh 'terraform apply -auto-approve'
-              }
+                sh 'terraform plan -out=tfplan'
             }
-}
+        }
+
+        stage('Terraform Apply') {
+            steps {
+                sh 'terraform apply -auto-approve tfplan'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Terraform applied successfully."
+        }
+        failure {
+            echo "Pipeline failed."
+        }
+    }
 }
 
